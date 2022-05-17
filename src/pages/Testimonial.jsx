@@ -1,15 +1,17 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 
 const Testimonial = () => {
 
+    const BACKEND_URL = `http://127.0.0.1:8000/api/`
     const [title, setTitle] = useState('')
     const [type, setType] = useState('')
     const [body, setBody] = useState('')
 
 
-    const handleTestimonies = (e) => {
+    const handleTestimonies = async (e) => {
         e.preventDefault()
+
         console.log(title)
         console.log(type)
         console.log(body)
@@ -17,9 +19,34 @@ const Testimonial = () => {
         localStorage.setItem('test_title', title)
         localStorage.setItem('type', type)
         localStorage.setItem('test_body', body)
+
+        fetch(`${BACKEND_URL}sanctum/csrf-cookie`).then(() => {
+
+            fetch(`${BACKEND_URL}testimonies`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    test_title: localStorage.getItem('test_title'),
+                    type: localStorage.getItem('type'),
+                    test_body: localStorage.getItem('test_body'),
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            }).then((response) => response.json())
+                .then((json) => console.log(json))
+                .catch((err) => console.log(err))
+        }).catch(err => console.log(err))
     }
 
-    const options = [
+    useEffect(() => {
+        // Save the testimony
+        handleTestimonies()
+    }, [])
+
+
+
+
+    const OPTIONS = [
         { value: 'overcome', label: 'Overcome' },
         { value: 'salvation', label: 'Salvation' },
         { value: 'faith', label: 'Faith' },
@@ -29,6 +56,7 @@ const Testimonial = () => {
     //   const MyComponent = () => (
     //     <Select options={options} />
     //   )
+
 
     return (
         <>
@@ -46,27 +74,22 @@ const Testimonial = () => {
                             className='p-3 bg-white border border-slate-500 rounded-sm'
                         />
                     </div>
-                    <div>
+                    <div className="flex flex-col">
                         <label>Testimony Type</label>
-                        {/* <select
-                            className='w-full p-3'
-                            name="type"
-                            value={type}
-                            defaultValue=""
-                            onChange={(e) => setType(e.target.value)}
-                        >
-                            <option value="">please select</option>
-                            <option value="overcome">Overcome</option>
-                            <option value="salvation">Salvation</option>
-                            <option value="faith">Faith</option>
-                            <option value="fear">Fear</option>
-                        </select> */}
-
+                        <select name="type" value={type} onChange={(e) => setType(e.target.value)} className='p-3 bg-white border border-slate-500 rounded-sm'>
+                            <option value="">Please select</option>
+                            {OPTIONS.map(choice => (
+                                <option key={choice.value}>
+                                    {choice.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <div className='w-full'>
+                    <div className='flex flex-col'>
                         <label>Testimony</label>
                         <textarea
                             name="test_body"
+                            value={body}
                             onChange={(e) => setBody(e.target.value)}
                             placeholder="Share your testimony"
                             className="w-full p-3 bg-white border border-slate-500 rounded-sm"
@@ -85,8 +108,8 @@ const Testimonial = () => {
                             Post Testimony
                         </button>
                     </div>
-                </form>
-            </div>
+                </form >
+            </div >
         </>
     )
 }
