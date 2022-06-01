@@ -1,9 +1,10 @@
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 
 const Testimonial = () => {
 
-    const BACKEND_URL = `http://127.0.0.1:8000/api/`
+    // const BACKEND_URL = `http://127.0.0.1:8000`
     const [title, setTitle] = useState('')
     const [type, setType] = useState('')
     const [body, setBody] = useState('')
@@ -12,31 +13,16 @@ const Testimonial = () => {
     const handleTestimonies = async (e) => {
         e.preventDefault()
 
-        console.log(title)
-        console.log(type)
-        console.log(body)
+        await axios.get('/sanctum/csrf-cookie').then(() => {
 
-        localStorage.setItem('test_title', title)
-        localStorage.setItem('type', type)
-        localStorage.setItem('test_body', body)
+            axios.post('/api/testimonies', {
 
-        fetch(`${BACKEND_URL}sanctum/csrf-cookie`).then(() => {
-
-            fetch(`${BACKEND_URL}testimonies`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    test_title: localStorage.getItem('test_title'),
-                    type: localStorage.getItem('type'),
-                    test_body: localStorage.getItem('test_body'),
-                }),
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
-                },
-            }).then((response) => response.json())
-                .then((json) => console.log(json))
-                .catch((err) => console.log(err))
-        }).catch(err => console.log(err))
+            }).then((response) => {
+                console.log(response.data)
+            }).catch((error) => { console.log(error) })
+        })
     }
+
 
     useEffect(() => {
         // Save the testimony

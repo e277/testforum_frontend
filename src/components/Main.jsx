@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 
 const Main = () => {
 
-    const BACKEND_URL = `http://127.0.0.1:8000/api`
     const [testimonies, setTestimonies] = useState([])
 
+    const fetchTestimonies = async () => {
+        await axios.get('/sanctum/csrf-cookie').then(() => {
+
+            axios.get('/api/testimonies').then((response) => {
+                console.log(response.data)
+            }).then((response) => {
+                setTestimonies(response.data)
+            }).catch((error) => {
+                console.log(error)
+            })
+        })
+    }
+
     useEffect(() => {
-
-        const fetchTestimonies = async () => {
-            const response = await fetch(`${BACKEND_URL}/testimonies`)
-            const data = await response.json()
-            console.log(data)
-            setTestimonies(data)
-        }
-
         fetchTestimonies()
-    }, [])
+    }, [testimonies])
+
 
     return (
         <>
